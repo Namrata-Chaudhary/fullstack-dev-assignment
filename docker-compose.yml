@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: secret_drop
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/secret_drop
+      - MASTER_KEY=${MASTER_KEY}
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost:5500}
+      - MAX_EXPIRY_SECONDS=604800
+      - MAX_SECRET_BYTES=10240
+    depends_on:
+      - db
+
+volumes:
+  pg_data:
