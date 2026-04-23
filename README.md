@@ -26,8 +26,8 @@
 
 | | |
 |---|---|
-| **Name** | Full-Stack Developer |
-| **Email** | developer@example.com |
+| **Name** | Namrata Chadhary|
+| **Email** | namrata4086@gmail.com |
 | **Submission date** | April 23, 2026 |
 | **Time taken** | ~60 minutes |
 
