@@ -288,9 +288,11 @@
       const btn = document.getElementById('revealBtn');
       setBtn(btn, 'Revealing…', true);
       try {
-        // TODO: update this call to match your bot-protection strategy.
-        // e.g. you may change the method, endpoint path, or add custom headers.
-        const data = await apiFetch('GET', `/api/secrets/${encodeURIComponent(id)}`);
+        // Uses POST method to prevent automatic bot access.
+        // Bots typically only issue GET/HEAD requests during URL preview.
+        // Additionally, browsers enforce same-origin policy on POST,
+        // which adds an extra layer of protection.
+        const data = await apiFetch('POST', `/api/secrets/${encodeURIComponent(id)}/reveal`);
         hide('viewReady');
         document.getElementById('secretDisplay').textContent = data.secret;
         show('viewSecret');

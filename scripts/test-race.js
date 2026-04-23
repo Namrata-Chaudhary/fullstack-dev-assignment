@@ -20,9 +20,13 @@ async function post(path, body) {
 }
 
 async function reveal(id) {
-  // NOTE: update to match your bot-protection strategy (method, headers, path)
-  const res = await fetch(`${BASE}${REVEAL_PATH}/${id}`, {
-    headers: { 'Content-Type': 'application/json' },
+  // NOTE: updated to use POST /api/secrets/:id/reveal for bot protection
+  const res = await fetch(`${BASE}${REVEAL_PATH}/${id}/reveal`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Origin': BASE  // Include Origin header to pass validation
+    },
   });
   return { status: res.status, body: await res.json() };
 }

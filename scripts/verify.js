@@ -45,9 +45,15 @@ async function createSecret(secret, ttl = 3600) {
 }
 
 async function revealSecret(id) {
-  // NOTE: update this function to match your bot-protection strategy
-  // e.g. change to POST, add headers, change path, etc.
-  return get(`${REVEAL_PATH}/${id}`);
+  // Uses POST /api/secrets/:id/reveal for bot protection
+  const res = await fetch(`${BASE}${REVEAL_PATH}/${id}/reveal`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Origin': BASE  // Include Origin header for validation
+    },
+  });
+  return { status: res.status, body: await res.json() };
 }
 
 // ── Tests ───────────────────────────────────────────────────────────────────

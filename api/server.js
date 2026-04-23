@@ -46,11 +46,29 @@ app.use((err, _req, res, _next) => {
 async function cleanupExpired() {
   try {
     // ── CHALLENGE 3 — Resilient Cleanup ─────────────────────────────────
-    // TODO: Delete secrets that have passed their expires_at deadline.
+    // Deletes secrets that have passed their expires_at deadline.
     // This job runs on startup and every 10 minutes so storage is reclaimed
     // even for secrets that were never viewed.
-    // Consider: if the server was down for hours, what happens to secrets
-    // that expired during that window? Are they still accessible?
+    //
+    // Design for resilience:
+    // 1. Runs on startup → catches any secrets that expired while server was down
+    // 2. Runs periodically (every 10 minutes) → ensures timely cleanup
+    // 3. Uses a simple WHERE expires_at < NOW() check
+    // 4. If the server crashes mid-cleanup, the next run will retry
+    // 5. Index on expires_at makes this query efficient
+    //
+    // Edge cases handled:
+    // - Server down for hours: next startup will cleanup all expired secrets
+    // - Network partition: cleanup is idempotent (deleting already-deleted rows is safe)
+    // - Clock skew: uses server's NOW(), not client time
+    
+    const result = await db.query(
+      `DELETE FROM secrets WHERE expires_at < NOW()`,
+    );
+    
+    if (result.rowCount > 0) {
+      console.log(`[Cleanup] Deleted ${result.rowCount} expired secrets.`);
+    }
   } catch (err) {
     console.error('Cleanup error:', err.message);
   }
